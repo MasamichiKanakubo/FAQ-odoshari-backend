@@ -55,8 +55,16 @@ async def get_faq():
             f"https://scrapbox.io/api/pages/{scrapbox_project_name}/{title}"
         ).json()
         question = res["title"]
-        description = res["descriptions"][0]
+        description = res["descriptions"]
         entry = {"question": question, "description": description}
         response_list.append(entry)
 
     return response_list
+
+@app.get("/api/{question_sententce}")
+async def get_question_detail(question_sentence: str):
+    url = f"https://scrapbox.io/api/pages/{scrapbox_project_name}/{question_sentence}"
+    response = requests.get(url).json()
+    question = response["title"]
+    description = response["descriptions"]
+    return {"question": question, "description": description}

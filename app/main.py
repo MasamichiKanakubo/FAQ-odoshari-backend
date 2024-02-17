@@ -1,4 +1,5 @@
 import os
+import re
 import asyncio
 import aiohttp
 import requests
@@ -56,18 +57,34 @@ async def get_faq():
         res = requests.get(
             f"https://scrapbox.io/api/pages/{scrapbox_project_name}/{title}"
         ).json()
-        question = res["title"]
-        description = res["descriptions"]
-        entry = {"question": question, "description": description}
+        page_title = res["title"]
+        descriptions = res["descriptions"]
+        pattern = re.compile(r"\?")
+        descriptions_list: list = []
+        regular_express_list: list = []
+        for string in descriptions:
+            if pattern.search(string):
+                regular_express_list.append(string)
+            else:
+                descriptions_list.append(string)
+        entry = {"page_title": page_title, "questions": regular_express_list}
         response_list.append(entry)
 
     return response_list
 
 
-@app.get("/api/faqs/{question_sentence}")
+@app.get("/api/pages/{question_sentence}")
 async def get_question_detail(question_sentence: str):
     url = f"https://scrapbox.io/api/pages/{scrapbox_project_name}/{question_sentence}"
     response = requests.get(url).json()
     question = response["title"]
-    description = response["descriptions"]
-    return {"question": question, "description": description}
+    descriptions = response["descriptions"]
+    regular_express_list: list = []
+    descriptions_list: list = []
+    pattern = re.compile(r"\?")
+    for string in descriptions:
+        if pattern.search(string):
+            regular_express_list.append(string)
+        else:
+            descriptions_list.append(string)
+    return {"page_title": question, "descriptions": descriptions_list}

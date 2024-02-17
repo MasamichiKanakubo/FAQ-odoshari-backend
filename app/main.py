@@ -5,6 +5,8 @@ import aiohttp
 import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List
+from itertools import product
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 from app.entities.schemas import Synonyms, QuestionSentence
@@ -67,6 +69,11 @@ async def get_faq():
                 regular_express_list.append(string)
             else:
                 descriptions_list.append(string)
+                
+        for string in regular_express_list:
+            cleaned_string = re.sub(r"\? ", "", string).strip("`")
+            regular_express_list = convert_text_to_questions(cleaned_string)            
+        
         entry = {"page_title": page_title, "questions": regular_express_list}
         response_list.append(entry)
 
@@ -88,3 +95,23 @@ async def get_question_detail(question_sentence: str):
         else:
             descriptions_list.append(string)
     return {"page_title": question, "descriptions": descriptions_list}
+
+
+def convert_text_to_questions(text: str) -> List[str]:
+    matches = re.finditer(r"\((.+?)\)", text)
+    options_list = [match.group(1).split("|") for match in matches]
+
+    combinations = generate_combinations(options_list)
+
+    return [apply_combination(text, combination) for combination in combinations]
+
+
+def generate_combinations(options_list):
+    return list(product(*options_list))
+
+
+def apply_combination(text, combination):
+    result = text
+    for option in combination:
+        result = result.replace(re.search(r"\((.+?)\)", result).group(), option, 1)
+    return result

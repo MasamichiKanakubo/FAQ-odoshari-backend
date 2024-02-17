@@ -5,11 +5,12 @@ import aiohttp
 import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from typing import List, Dict
 from itertools import product
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 from app.entities.schemas import Synonyms, QuestionSentence
+from bs4 import BeautifulSoup
 
 
 load_dotenv()
@@ -115,3 +116,23 @@ def apply_combination(text, combination):
     for option in combination:
         result = result.replace(re.search(r"\((.+?)\)", result).group(), option, 1)
     return result
+
+@app.get("/api/synonyms/{word}")
+async def get_weblio_synonyms(word: str) -> Dict[str, List[str]]:
+    url = f"https://thesaurus.weblio.jp/content/{word}"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    li_tags = soup.find_all("li")
+    li_strings: list = [li.string for li in li_tags if li.string is not None]
+
+    data: list = await get_faq()
+    all_questions = [question for item in data for question in item["questions"]]
+
+    contains_dict: dict = {}
+    for word in li_strings:
+        matched_sentences = [sentence for sentence in all_questions if word in sentence]
+        if matched_sentences:
+            contains_dict[word] = matched_sentences
+
+
+    return contains_dict

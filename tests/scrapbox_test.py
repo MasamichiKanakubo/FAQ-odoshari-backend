@@ -35,3 +35,4 @@ def get_question_detail(question_sentence: str):
     response = requests.get(url).json()
     return response
 print(get_question_detail("hogehoge2"))
+

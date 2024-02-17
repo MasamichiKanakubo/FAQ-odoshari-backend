@@ -2,7 +2,6 @@ import os
 import requests
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 scrapbox_project_name = os.getenv("SCRAPBOX_PROJECT_NAME")
@@ -31,8 +30,5 @@ def get_scrapbox_json(project_name: str):
 def get_question_detail(question_sentence: str):
     url = f"https://scrapbox.io/api/pages/{scrapbox_project_name}/{question_sentence}"
     response = requests.get(url).json()
-    # question = response["title"]
-    # description = response["descriptions"]
-    # return {"question": question, "description": description}
     return response
-
+print(get_question_detail("hogehoge2"))

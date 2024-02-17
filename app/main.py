@@ -2,11 +2,12 @@ import os
 import asyncio
 import aiohttp
 import requests
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
-from app.entities.schemas import Synonyms
+from app.entities.schemas import Synonyms, QuestionSentence
+
 
 load_dotenv()
 
@@ -25,6 +26,7 @@ app.add_middleware(
 
 deploy_url = "https://faq-odoshari-api.onrender.com/"
 connector = aiohttp.TCPConnector(ssl=False)
+
 
 async def send_request():
     while True:
@@ -61,7 +63,8 @@ async def get_faq():
 
     return response_list
 
-@app.get("/api/faqs/{question_sententce}")
+
+@app.get("/api/faqs/{question_sentence}")
 async def get_question_detail(question_sentence: str):
     url = f"https://scrapbox.io/api/pages/{scrapbox_project_name}/{question_sentence}"
     response = requests.get(url).json()

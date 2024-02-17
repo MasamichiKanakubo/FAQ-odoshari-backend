@@ -1,5 +1,6 @@
 import os
 import requests
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,11 +18,13 @@ def get_scrapbox_json(project_name: str):
             f"https://scrapbox.io/api/pages/{project_name}/{title}"
         ).json()
         question = res["title"]
-        description = res["descriptions"]
-        entry = {"question": question, "description": description}
+        descriptions = res["descriptions"]
+        pattern = re.compile(r"\?")
+        entry = {"question": question, "description": descriptions}
         response_list.append(entry)
 
     return response_list
+print(get_scrapbox_json(scrapbox_project_name))
 
 
 # (get_scrapbox_json(scrapbox_project_name))

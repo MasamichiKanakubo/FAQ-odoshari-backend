@@ -61,7 +61,7 @@ async def get_faq():
 
     return response_list
 
-@app.get("/api/{question_sententce}")
+@app.get("/api/faqs/{question_sententce}")
 async def get_question_detail(question_sentence: str):
     url = f"https://scrapbox.io/api/pages/{scrapbox_project_name}/{question_sentence}"
     response = requests.get(url).json()

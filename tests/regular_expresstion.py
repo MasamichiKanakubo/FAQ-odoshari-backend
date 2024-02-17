@@ -1,4 +1,6 @@
 import re
+from itertools import product
+from typing import List
 
 tmp_list = [
     "`? hogehogeを変更したい(hogehoge|taxman taxman)`",
@@ -8,17 +10,29 @@ tmp_list = [
     "`? hogehogeを変更したい(hogehoge|taxman taxman)`",
 ]
 
-pattern = re.compile(r"\? ")  # 正規表現パターン
+input_string1 = "`? hogehogeを変更したい(hogehoge|taxman taxman)`"
+input_string2 = "`? (hogehoge|fugafuga)を(変更し|変え)たい`"
 
-descriptions_list: list = []
-regular_express_list: list = []
+# "? "を削除
+cleaned_string = re.sub(r"\? ", "", input_string2).strip("`")
+
+def convert_text_to_questions(text: str) -> List[str]:
+    matches = re.finditer(r"\((.+?)\)", text)
+    options_list = [match.group(1).split("|") for match in matches]
+
+    combinations = generate_combinations(options_list)
+
+    return [apply_combination(text, combination) for combination in combinations]
 
 
-for string in tmp_list:
-    if pattern.search(string):
-        regular_express_list.append(string)
-    else:
-        descriptions_list.append(string)
-        
-print(descriptions_list) 
-print(regular_express_list) 
+def generate_combinations(options_list):
+    return list(product(*options_list))
+
+
+def apply_combination(text, combination):
+    result = text
+    for option in combination:
+        result = result.replace(re.search(r"\((.+?)\)", result).group(), option, 1)
+    return result
+
+print(convert_text_to_questions(cleaned_string))

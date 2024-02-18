@@ -8,10 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict
 from itertools import product
 from dotenv import load_dotenv
-from fastapi.responses import JSONResponse
-from app.entities.schemas import Synonyms, QuestionSentence
 from bs4 import BeautifulSoup
-
+from openai import OpenAI
+from app.repositories.gpt_repository import GPTRepository
 
 load_dotenv()
 
@@ -19,6 +18,7 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 scrapbox_project_name = os.getenv("SCRAPBOX_PROJECT_NAME")
 
 app = FastAPI()
+gpt_repository = GPTRepository(client=OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
 
 app.add_middleware(
     CORSMiddleware,
@@ -48,6 +48,10 @@ async def startup_event():
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@app.get("/api/gpt4/{word}")
+async def get_gpt4_answer(word: str):
+    return gpt_repository.generate_gpt4_answer(word)
 
 
 @app.get("/api/faqs")

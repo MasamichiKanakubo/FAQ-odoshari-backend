@@ -130,13 +130,13 @@ async def get_weblio_synonyms(word: str) -> Dict[str, List[str]]:
 
     data: list = await get_faq()
     all_questions = [question for item in data for question in item["questions"]]
-
-    contains_dict: dict = {}
+    
+    response_dict: dict = {}
+    contains_list: list = []
     for word in li_strings:
         matched_sentences = [sentence for sentence in all_questions if word in sentence]
-        print(matched_sentences)
         if matched_sentences:
-            contains_dict[word] = matched_sentences
+            contains_list.append(word)
 
-
-    return contains_dict
+    response_dict["similar_words"] = contains_list
+    return response_dict

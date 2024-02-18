@@ -16,6 +16,7 @@ load_dotenv()
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 scrapbox_project_name = os.getenv("SCRAPBOX_PROJECT_NAME")
+pattern = re.compile(r"\?")
 
 app = FastAPI()
 gpt_repository = GPTRepository(client=OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
@@ -66,7 +67,6 @@ async def get_faq():
         ).json()
         page_title = res["title"]
         descriptions = res["descriptions"]
-        pattern = re.compile(r"\?")
         descriptions_list: list = []
         regular_express_list: list = []
         for string in descriptions:
@@ -93,7 +93,6 @@ async def get_question_detail(question_sentence: str):
     descriptions = response["descriptions"]
     regular_express_list: list = []
     descriptions_list: list = []
-    pattern = re.compile(r"\?")
     for string in descriptions:
         if pattern.search(string):
             regular_express_list.append(string)
@@ -131,12 +130,13 @@ async def get_weblio_synonyms(word: str) -> Dict[str, List[str]]:
 
     data: list = await get_faq()
     all_questions = [question for item in data for question in item["questions"]]
-
-    contains_dict: dict = {}
+    
+    response_dict: dict = {}
+    contains_list: list = []
     for word in li_strings:
         matched_sentences = [sentence for sentence in all_questions if word in sentence]
         if matched_sentences:
-            contains_dict[word] = matched_sentences
+            contains_list.append(word)
 
-
-    return contains_dict
+    response_dict["similar_words"] = contains_list
+    return response_dict
